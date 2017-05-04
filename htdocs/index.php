@@ -21,6 +21,7 @@ $app->router     = new \Anax\Route\RouterInjectable();
 $app->view       = new \Anax\View\ViewContainer();
 $app->db         = new \Anax\Database\DatabaseConfigure();
 $app->textfilter = new \Anax\TextFilter\TextFilter();
+$app->session    = new \Anax\Session\SessionConfigurable();
 
 // Init the object of the request class.
 $app->request->init();
@@ -45,6 +46,9 @@ $app->url->setDefaultsFromConfiguration();
 // Get database config.
 $app->db->configure("database.php");
 $app->db->setDefaultsFromConfiguration();
+
+// Get session config.
+$app->session->configure("session.php");
 
 // Load the routes
 require ANAX_INSTALL_PATH . "/config/route.php";

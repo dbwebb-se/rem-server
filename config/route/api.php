@@ -5,55 +5,67 @@
 
 
 /**
- * Create a session and store data in it.
+ * Fill the session with some default data.
+ *
+ * @return void
  */
-$app->router->get("api/**", function () use ($app) {
-    $app->session();
+function initSessionWithDataset($app)
+{
+    $files = ["users"];
+    $dataset = [];
+    foreach ($files as $file) {
+        $content = file_get_contents(ANAX_INSTALL_PATH . "/api/$file.json");
+        $dataset[$file] = json_decode($content, true);
+    }
 
-    $data = [
-        "offset"    => 0,
-        "limit"     => 10,
-        "total"     => 36,
-        "data"      => [
-            "id" => "1",
-            "firstName" => "Jannet",
-            "lastName" => "Sarro",
-        ],
-    ];
-
-    $app->response->sendJson($data);
-});
-
+    $app->session->set("api", $dataset);
+}
 
 
 
 /**
- * REM api
+ * Start/create a session and store some default data in it.
  */
-$app->router->get("api/{things}", function ($things) use ($app) {
-    $data = [
-        "offset"    => 0,
-        "limit"     => 10,
-        "total"     => 36,
-        "data"      => [
-            "id" => "1",
-            "firstName" => "Jannet",
-            "lastName" => "Sarro",
-        ],
-    ];
+$app->router->add("api/**", function () use ($app) {
+    $app->session->start();
 
-    $app->response->sendJson($data);
+    $data = $app->session->get("api");
+    if (is_null($data)) {
+        initSessionWithDataset($app);
+    }
 });
 
 
-/* 
-Sheryl Nimmons
-Verla Shears
-Rod Malick
-Onie Thrower
-Daren Hunkins
-Verlie Apel
-Angelyn Varden
-Cherry Barna
-Dewey Dockery
-*/
+
+/**
+ * Re-init the session with a default dataset.
+ */
+$app->router->get("api/init", function () use ($app) {
+    initSessionWithDataset($app);
+    $app->response->sendJson(["message" => "The session is initiated with the default dataset."]);
+    exit;
+});
+
+
+
+/**
+ * Get a subset of a particulare dataset
+ */
+$app->router->get("api/{things:alphanum}", function ($things) use ($app) {
+    $data = $app->session->get("api");
+
+    $dataset = array_key_exists($things, $data)
+        ? $data[$things]
+        : [];
+
+    $offset = $app->request->getGet("offset", 0);
+    $limit = $app->request->getGet("limit", 10);
+    $res = [
+        "data" => array_slice($dataset, $offset, $limit),
+        "offset" => $offset,
+        "limit" => $limit,
+        "total" => count($dataset)
+    ];
+
+    $app->response->sendJson($res);
+});

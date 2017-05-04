@@ -14,6 +14,8 @@
         "anax/router": "^1.0",
         "anax/response": "^1.0",
         "anax/view": "^1.0",
+        "anax/session": "^1.0",
+        "anax/configure": "^1.0",
         "anax/textfilter": "^1.0",
         "anax/database": "^1.0"
     },
