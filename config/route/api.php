@@ -49,7 +49,7 @@ $app->router->get("api/init", function () use ($app) {
 
 
 /**
- * Get a subset of a particulare dataset
+ * Get a subset of a particular dataset
  */
 $app->router->get("api/{things:alphanum}", function ($things) use ($app) {
     $data = $app->session->get("api");
@@ -68,4 +68,33 @@ $app->router->get("api/{things:alphanum}", function ($things) use ($app) {
     ];
 
     $app->response->sendJson($res);
+});
+
+
+
+/**
+ * Get one item from a particular dataset
+ */
+$app->router->get("api/{things:alphanum}/{id:digit}", function ($things, $id) use ($app) {
+    $data = $app->session->get("api");
+
+    $dataset = array_key_exists($things, $data)
+        ? $data[$things]
+        : [];
+
+    // Find by id
+    $found = null;
+    foreach ($dataset as $item) {
+        if ($item["id"] === $id) {
+            $found = $item;
+            break;
+        }
+    }
+
+    if (!$found) {
+        $app->response->sendJson(["message" => "The item is not found."]);
+        exit;
+    }
+
+    $app->response->sendJson($found);
 });
