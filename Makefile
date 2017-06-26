@@ -143,7 +143,7 @@ tag-prepare:
 .PHONY: local-publish
 local-publish:
 	@$(call HELPTEXT,$@)
-	rsync -av $(EXCLUDE_ON_PUBLISH) config content htdocs vendor src api $(LOCAL_HTDOCS)
+	rsync -av $(EXCLUDE_ON_PUBLISH) config content htdocs vendor src $(LOCAL_HTDOCS)
 
 	@# Enable robots if available
 	[ ! -f $(ROBOTSTXT) ] || cp $(ROBOTSTXT) "$(LOCAL_HTDOCS)/htdocs/robots.txt" 
