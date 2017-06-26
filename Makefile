@@ -68,9 +68,6 @@ help:
 .PHONY:  prepare
 prepare:
 	@$(call HELPTEXT,$@)
-	[ -d .bin ] || mkdir .bin
-	[ -d build ] || mkdir build
-	rm -rf build/*
 
 
 
@@ -78,7 +75,6 @@ prepare:
 .PHONY: clean
 clean:
 	@$(call HELPTEXT,$@)
-	rm -rf build
 
 
 
@@ -86,20 +82,20 @@ clean:
 .PHONY:  clean-all
 clean-all: clean
 	@$(call HELPTEXT,$@)
-	rm -rf .bin vendor composer.lock
+	rm -rf vendor
 
 
 
 # target: check              - Check version of installed tools.
 .PHONY:  check
-check: check-tools-php
+check:
 	@$(call HELPTEXT,$@)
 
 
 
 # target: test               - Run all tests.
 .PHONY:  test
-test: phpunit phpcs phpmd phploc behat
+test:
 	@$(call HELPTEXT,$@)
 	composer validate
 
