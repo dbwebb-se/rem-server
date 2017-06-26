@@ -169,7 +169,7 @@ ssl-cert-renew:
 	sudo service apache2 start
 
 
-# target: etc-hosts - Create a entry in the /etc/hosts for local access.
+# target: etc-hosts          - Create a entry in the /etc/hosts for local access.
 .PHONY: etc-hosts
 etc-hosts:
 	$(ECHO) "127.0.0.1 $(WWW_LOCAL)" | sudo bash -c 'cat >> /etc/hosts'
