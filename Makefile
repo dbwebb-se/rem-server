@@ -119,10 +119,11 @@ build: test doc #less-compile less-minify js-minify
 
 
 
-# target: install            - Install all tools
+# target: install            - Install essentials.
 .PHONY:  install
-install: prepare install-tools-php
+install:
 	@$(call HELPTEXT,$@)
+	composer install
 
 
 

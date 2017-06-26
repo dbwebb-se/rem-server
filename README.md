@@ -14,7 +14,16 @@ REM, a REST Mockup API for rapid prototyping
 
 
 
-Local setup
+Setup
+--------------------------------------------
+
+Git clone it.
+
+Point a web browser to the htdocs directory.
+
+
+
+Setup Apache Virtual Host
 --------------------------------------------
 
 This is how you set up a local environment for a apache virtual host on your own machine.
