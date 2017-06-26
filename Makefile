@@ -130,109 +130,170 @@ tag-prepare:
 
 
 
-# ------------------------------------------------------------------------
-#
-# PHP
-#
+# target: ssl-cert-create    - One way to create the certificates.
+.PHONY: ssl-cert-create
+ssl-cert-create:
+	sudo certbot certonly --standalone -d $(WWW_SITE) -d www.$(WWW_SITE)
 
-# target: install-tools-php  - Install PHP development tools.
-.PHONY: install-tools-php
-install-tools-php:
+
+
+# target: ssl-cert-update    - Update certificates with new expiray date.
+.PHONY: ssl-cert-renew
+ssl-cert-renew:
+	sudo service apache2 stop
+	sudo certbot renew
+	sudo service apache2 start
+
+
+
+# target: virtual-host       - Create entries for the virtual host http.
+.PHONY: virtual-host
+
+define VIRTUAL_HOST_80
+Define site $(WWW_SITE)
+ServerAdmin $(SERVER_ADMIN)
+
+<VirtualHost *:80>
+	ServerName $${site}
+	ServerAlias local.$${site}
+	ServerAlias do1.$${site}
+	ServerAlias do2.$${site}
+	ServerAlias bth1.$${site}
+	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
+
+	<Directory />
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+		Order allow,deny
+		Allow from all
+
+		Options +ExecCGI
+		AddHandler cgi-script .cgi
+	</Directory>
+
+	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
+		ExpiresActive On
+		ExpiresDefault "access plus 1 week"
+	</FilesMatch>
+
+	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
+		ExpiresActive On
+		ExpiresDefault "access plus 1 week"
+	</FilesMatch>
+
+	Include $(HTDOCS_BASE)/$${site}/config/apache-redirects
+	Include $(HTDOCS_BASE)/$${site}/config/apache-rewrites 
+
+	#LogLevel alert rewrite:trace6
+	# tail -f error.log | fgrep '[rewrite:'
+
+	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
+	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined
+</VirtualHost>
+endef
+export VIRTUAL_HOST_80
+
+define VIRTUAL_HOST_80_WWW
+Define site $(WWW_SITE)
+ServerAdmin $(SERVER_ADMIN)
+
+<VirtualHost *:80>
+	ServerName www.$${site}
+	Redirect "/" "http://$${site}/"
+</VirtualHost>
+endef
+export VIRTUAL_HOST_80_WWW
+
+virtual-host:
 	@$(call HELPTEXT,$@)
-	curl -Lso $(PHPDOC) https://www.phpdoc.org/phpDocumentor.phar && chmod 755 $(PHPDOC)
+	install -d $(LOCAL_HTDOCS)/htdocs
+	$(ECHO) "$$VIRTUAL_HOST_80" | sudo bash -c 'cat > /etc/apache2/sites-available/$(WWW_SITE).conf'
+	$(ECHO) "$$VIRTUAL_HOST_80_WWW" | sudo bash -c 'cat > /etc/apache2/sites-available/www.$(WWW_SITE).conf'
+	sudo a2ensite $(WWW_SITE) www.$(WWW_SITE)
+	sudo a2enmod rewrite expires cgi
+	sudo apachectl configtest
+	sudo service apache2 reload
 
-	curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
+# target: virtual-host-https - Create entries for the virtual host https.
+.PHONY: virtual-host-https
 
-	curl -Lso $(PHPCBF) https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar && chmod 755 $(PHPCBF)
+define VIRTUAL_HOST_443
+Define site $(WWW_SITE)
+ServerAdmin $(SERVER_ADMIN)
 
-	curl -Lso $(PHPMD) http://static.phpmd.org/php/latest/phpmd.phar && chmod 755 $(PHPMD)
+<VirtualHost *:80>
+	ServerName $${site}
+	ServerAlias do1.$${site}
+	ServerAlias do2.$${site}
+	ServerAlias bth1.$${site}
+	Redirect "/" "https://$${site}/"
+</VirtualHost>
 
-	curl -Lso $(PHPUNIT) https://phar.phpunit.de/phpunit-5.7.9.phar && chmod 755 $(PHPUNIT)
+<VirtualHost *:443>
+	Include $(SSL_APACHE_CONF)
+	SSLCertificateFile 		$(SSL_PEM_BASE)/cert.pem
+	SSLCertificateKeyFile 	$(SSL_PEM_BASE)/privkey.pem
+	SSLCertificateChainFile $(SSL_PEM_BASE)/chain.pem
 
-	curl -Lso $(PHPLOC) https://phar.phpunit.de/phploc.phar && chmod 755 $(PHPLOC)
+	ServerName $${site}
+	ServerAlias do1.$${site}
+	ServerAlias do2.$${site}
+	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
 
-	curl -Lso $(BEHAT) https://github.com/Behat/Behat/releases/download/v3.3.0/behat.phar && chmod 755 $(BEHAT)
+	<Directory />
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+		Order allow,deny
+		Allow from all
 
-	[ ! -f composer.json ] || composer install
+		Options +ExecCGI
+		AddHandler cgi-script .cgi
+	</Directory>
 
+	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
+		ExpiresActive On
+		ExpiresDefault "access plus 1 week"
+	</FilesMatch>
 
+	Include $(HTDOCS_BASE)/$${site}/config/apache-redirects
+	Include $(HTDOCS_BASE)/$${site}/config/apache-rewrites 
 
-# target: check-tools-php    - Check versions of PHP tools.
-.PHONY: check-tools-php
-check-tools-php:
+	#LogLevel alert rewrite:trace6
+	# tail -f error.log | fgrep '[rewrite:'
+
+	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
+	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined
+</VirtualHost>
+endef
+export VIRTUAL_HOST_443
+
+define VIRTUAL_HOST_443_WWW
+Define site $(WWW_SITE)
+ServerAdmin $(SERVER_ADMIN)
+
+<VirtualHost *:80>
+	ServerName www.$${site}
+	Redirect "/" "https://www.$${site}/"
+</VirtualHost>
+
+<VirtualHost *:443>
+	Include $(SSL_APACHE_CONF)
+	SSLCertificateFile 		$(SSL_PEM_BASE)/cert.pem
+	SSLCertificateKeyFile 	$(SSL_PEM_BASE)/privkey.pem
+	SSLCertificateChainFile $(SSL_PEM_BASE)/chain.pem
+
+	ServerName www.$${site}
+	Redirect "/" "https://$${site}/"
+</VirtualHost>
+endef
+export VIRTUAL_HOST_443_WWW
+
+virtual-host-https:
 	@$(call HELPTEXT,$@)
-	$(PHPUNIT) --version
-	$(PHPLOC) --version
-	$(PHPCS) --version && echo
-	$(PHPMD) --version && echo
-	$(PHPCBF) --version && echo
-	$(PHPDOC) --version && echo
-	$(BEHAT) --version && echo
-
-
-
-# target: phpunit            - Run unit tests for PHP.
-.PHONY: phpunit
-phpunit: prepare
-	@$(call HELPTEXT,$@)
-	[ ! -d "test" ] || $(PHPUNIT) --configuration .phpunit.xml
-
-
-
-# target: phpcs              - Codestyle for PHP.
-.PHONY: phpcs
-phpcs: prepare
-	@$(call HELPTEXT,$@)
-	$(PHPCS) --standard=.phpcs.xml | tee build/phpcs
-
-
-
-# target: phpcbf             - Fix codestyle for PHP.
-.PHONY: phpcbf
-phpcbf:
-	@$(call HELPTEXT,$@)
-ifneq ($(wildcard test),)
-	$(PHPCBF) --standard=.phpcs.xml
-else
-	$(PHPCBF) --standard=.phpcs.xml src
-endif
-
-
-
-# target: phpmd              - Mess detector for PHP.
-.PHONY: phpmd
-phpmd: prepare
-	@$(call HELPTEXT,$@)
-	- $(PHPMD) . text .phpmd.xml | tee build/phpmd
-
-
-
-# target: phploc             - Code statistics for PHP.
-.PHONY: phploc
-phploc: prepare
-	@$(call HELPTEXT,$@)
-	$(PHPLOC) src > build/phploc
-
-
-
-# target: phpdoc             - Create documentation for PHP.
-.PHONY: phpdoc
-phpdoc:
-	@$(call HELPTEXT,$@)
-	[ ! -d doc ] || $(PHPDOC) --config=.phpdoc.xml
-
-
-
-# target: behat              - Run behat for feature tests.
-.PHONY: behat
-behat:
-	@$(call HELPTEXT,$@)
-	[ ! -d features ] || $(BEHAT)
-
-
-
-# target: theme              - Execute make build install in theme directory.
-.PHONY: theme
-theme:
-	@$(call HELPTEXT,$@)
-	[ ! -d theme ] || $(MAKE) --directory=theme build install
+	$(ECHO) "$$VIRTUAL_HOST_443" | sudo bash -c 'cat > /etc/apache2/sites-available/$(WWW_SITE).conf'
+	$(ECHO) "$$VIRTUAL_HOST_443_WWW" | sudo bash -c 'cat > /etc/apache2/sites-available/www.$(WWW_SITE).conf'
+	sudo a2enmod ssl
+	sudo apachectl configtest
+	sudo service apache2 reload

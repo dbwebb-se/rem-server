@@ -51,15 +51,15 @@ $app->router->get("api/init", function () use ($app) {
 /**
  * Get a subset of a particular dataset
  */
-$app->router->get("api/{things:alphanum}", function ($things) use ($app) {
+$app->router->get("api/{dataset:alphanum}", function ($dataset) use ($app) {
     $data = $app->session->get("api");
 
-    $dataset = array_key_exists($things, $data)
-        ? $data[$things]
+    $dataset = array_key_exists($dataset, $data)
+        ? $data[$dataset]
         : [];
 
     $offset = $app->request->getGet("offset", 0);
-    $limit = $app->request->getGet("limit", 10);
+    $limit = $app->request->getGet("limit", 25);
     $res = [
         "data" => array_slice($dataset, $offset, $limit),
         "offset" => $offset,
@@ -75,11 +75,11 @@ $app->router->get("api/{things:alphanum}", function ($things) use ($app) {
 /**
  * Get one item from a particular dataset
  */
-$app->router->get("api/{things:alphanum}/{id:digit}", function ($things, $id) use ($app) {
+$app->router->get("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) use ($app) {
     $data = $app->session->get("api");
 
-    $dataset = array_key_exists($things, $data)
-        ? $data[$things]
+    $dataset = array_key_exists($dataset, $data)
+        ? $data[$dataset]
         : [];
 
     // Find by id
@@ -97,4 +97,105 @@ $app->router->get("api/{things:alphanum}/{id:digit}", function ($things, $id) us
     }
 
     $app->response->sendJson($found);
+});
+
+
+
+/**
+ * Create a new item and add to the dataset
+ */
+$app->router->post("api/{dataset:alphanum}", function ($dataset) use ($app) {
+    // Get/create the dataset selected
+    $data = $app->session->get("api");
+    $set = isset($data[$dataset])
+        ? $data[$dataset]
+        : [];
+
+    // Get max value for the id
+    $max = 0;
+    foreach ($set as $val) {
+        if ($max < $val["id"]) {
+            $max = $val["id"];
+        }
+    }
+
+    // Get the entry data from the request body and set the id
+    $entry = $app->request->getBody();
+    $entry = json_decode($entry, true);
+    $entry["id"] = $max + 1;
+
+    // Add new entry to the dataset
+    $set[] = $entry;
+    $data[$dataset] = $set;
+    $app->session->set("api", $data);
+
+    $app->response->sendJson($entry);
+});
+
+
+
+/**
+ * Upsert/replace an item in the dataset
+ */
+$app->router->put("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) use ($app) {
+    // Get/create the dataset selected
+    $data = $app->session->get("api");
+    $set = isset($data[$dataset])
+        ? $data[$dataset]
+        : [];
+    $id = (int) $id;
+
+    // Get the entry data from the request body
+    $entry = $app->request->getBody();
+    $entry = json_decode($entry, true);
+    $entry["id"] = $id;
+
+    // Upsert/replace the item in the dataset
+    $found = false;
+    foreach ($set as $key => $val) {
+        if ($id === $val["id"]) {
+            $set[$key] = $entry;
+            $found = true;
+            break;
+        }
+    }
+
+    if (!$found) {
+        $set[] = $entry;
+    }
+
+    // Save the updated dataset
+    $data[$dataset] = $set;
+    $app->session->set("api", $data);
+
+    $app->response->sendJson($entry);
+});
+
+
+
+/**
+ * Delete an item from the dataset
+ */
+$app->router->delete("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) use ($app) {
+    // Get/create the dataset selected
+    $data = $app->session->get("api");
+    $set = isset($data[$dataset])
+        ? $data[$dataset]
+        : [];
+    $id = (int) $id;
+
+    // Delete the item in the dataset
+    $entry = null;
+    foreach ($set as $key => $val) {
+        if ($id === $val["id"]) {
+            unset($set[$key]);
+            break;
+        }
+    }
+
+    // Save the updated dataset
+    $data[$dataset] = $set;
+    $app->session->set("api", $data);
+
+    $app->response->sendJson(null);
 });

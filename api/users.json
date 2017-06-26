@@ -1,61 +1,61 @@
 [
     {
-        "id": "1",
+        "id": 1,
         "firstName": "Phuong",
         "lastName": "Allison"
     },
     {
-        "id": "2",
+        "id": 2,
         "firstName": "Marie",
         "lastName": "Collinsworth"
     },
     {
-        "id": "3",
+        "id": 3,
         "firstName": "Simon",
         "lastName": "Uzzle"
     },
     {
-        "id": "4",
+        "id": 4,
         "firstName": "Faustina",
         "lastName": "Byfield"
     },
     {
-        "id": "5",
+        "id": 5,
         "firstName": "Robbie",
         "lastName": "Perdue"
     },
     {
-        "id": "6",
+        "id": 6,
         "firstName": "Lue",
         "lastName": "Lover"
     },
     {
-        "id": "7",
+        "id": 7,
         "firstName": "Etha",
         "lastName": "Nolley"
     },
     {
-        "id": "8",
+        "id": 8,
         "firstName": "Jeremiah",
         "lastName": "Lindauer"
     },
     {
-        "id": "9",
+        "id": 9,
         "firstName": "Coreen",
         "lastName": "Olin"
     },
     {
-        "id": "10",
+        "id": 10,
         "firstName": "Josh",
         "lastName": "Wayland"
     },
     {
-        "id": "11",
+        "id": 11,
         "firstName": "Soo",
         "lastName": "Pullins"
     },
     {
-        "id": "12",
+        "id": 12,
         "firstName": "Shana",
         "lastName": "Monty"
     }
