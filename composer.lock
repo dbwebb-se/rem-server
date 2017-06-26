@@ -106,16 +106,16 @@
         },
         {
             "name": "anax/request",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canax/request.git",
-                "reference": "79c67eedd72e5727f990143f42e4bda4ce839a53"
+                "reference": "6a1ee3cde19d0f2d9a135dfbf346afd8bd5c009c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canax/request/zipball/79c67eedd72e5727f990143f42e4bda4ce839a53",
-                "reference": "79c67eedd72e5727f990143f42e4bda4ce839a53",
+                "url": "https://api.github.com/repos/canax/request/zipball/6a1ee3cde19d0f2d9a135dfbf346afd8bd5c009c",
+                "reference": "6a1ee3cde19d0f2d9a135dfbf346afd8bd5c009c",
                 "shasum": ""
             },
             "require": {
@@ -151,7 +151,7 @@
                 "micro",
                 "mvc"
             ],
-            "time": "2017-04-03T22:00:09+00:00"
+            "time": "2017-06-26T12:29:07+00:00"
         },
         {
             "name": "anax/response",
@@ -403,16 +403,16 @@
         },
         {
             "name": "anax/view",
-            "version": "v1.0.9",
+            "version": "v1.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canax/view.git",
-                "reference": "0f2dc383f055d791caf01280f364f80359dc8f43"
+                "reference": "18c4d31c83dd90f4b0f851cdfbc514226092741a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canax/view/zipball/0f2dc383f055d791caf01280f364f80359dc8f43",
-                "reference": "0f2dc383f055d791caf01280f364f80359dc8f43",
+                "url": "https://api.github.com/repos/canax/view/zipball/18c4d31c83dd90f4b0f851cdfbc514226092741a",
+                "reference": "18c4d31c83dd90f4b0f851cdfbc514226092741a",
                 "shasum": ""
             },
             "require": {
@@ -449,7 +449,7 @@
                 "micro",
                 "mvc"
             ],
-            "time": "2017-06-26T07:57:10+00:00"
+            "time": "2017-06-26T15:07:20+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
