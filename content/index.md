@@ -9,7 +9,17 @@ You can add your own datasets and work with them on `api/[datasets]`.
 
 
 
-API {#try}
+Try it {#try}
+-------------------------------------------
+
+You can try out the pre-populated dataset `users`.
+
+* [Get all users](api/users)
+* [Get the user with `id=1`](api/users/1)
+
+
+
+API {#api}
 -------------------------------------------
 
 ###Get the dataset {#all}

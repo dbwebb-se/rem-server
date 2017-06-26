@@ -17,10 +17,11 @@ REM, a REST Mockup API for rapid prototyping
 Local setup
 --------------------------------------------
 
-Git clone it.
+This is how you set up a local environment for a apache virtual host on your own machine.
 
 ```bash
-$ make install
+$ make etc-hosts
+$ sudo make virtual-hosts
 ```
 
 

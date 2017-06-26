@@ -28,16 +28,28 @@ THIS_MAKEFILE := $(call WHERE-AM-I)
 # Echo some nice helptext based on the target comment
 HELPTEXT = $(ECHO) "$(ACTION)--->" `egrep "^\# target: $(1) " $(THIS_MAKEFILE) | sed "s/\# target: $(1)[ ]*-[ ]* / /g"` "$(NO_COLOR)"
 
-# Add local bin path for test tools
-#PATH := "./.bin:./vendor/bin:./node_modules/.bin:$(PATH)"
-#SHELL := env PATH=$(PATH) $(SHELL)
-PHPUNIT := .bin/phpunit
-PHPLOC 	:= .bin/phploc
-PHPCS   := .bin/phpcs
-PHPCBF  := .bin/phpcbf
-PHPMD   := .bin/phpmd
-PHPDOC  := .bin/phpdoc
-BEHAT   := .bin/behat
+
+
+# --------------------------------------------------------------------------
+#
+# Local
+#
+WWW_SITE	:= rem.dbwebb.se
+WWW_LOCAL	:= local.$(WWW_SITE)
+SERVER_ADMIN := mos@$(WWW_SITE)
+BASE_URL    = https://$(WWW_SITE)/
+
+GIT_BASE 	= git/$(WWW_SITE)
+HTDOCS_BASE = $(HOME)/htdocs
+LOCAL_HTDOCS = $(HTDOCS_BASE)/$(WWW_SITE)
+ROBOTSTXT	 := robots.txt
+
+# Certificates for https
+SSL_APACHE_CONF = /etc/letsencrypt/options-ssl-apache.conf
+SSL_PEM_BASE 	= /etc/letsencrypt/live/$(WWW_SITE)
+
+# Publish
+EXCLUDE_ON_PUBLISH = --exclude old --exclude backup --exclude .git --exclude .solution --exclude .solutions --exclude error.log --exclude cache --exclude access.log --delete
 
 
 
@@ -130,6 +142,17 @@ tag-prepare:
 
 
 
+# target: local-publish      - Publish website to local host.
+.PHONY: local-publish
+local-publish:
+	@$(call HELPTEXT,$@)
+	rsync -av $(EXCLUDE_ON_PUBLISH) config content htdocs vendor src api $(LOCAL_HTDOCS)
+
+	@# Enable robots if available
+	[ ! -f $(ROBOTSTXT) ] || cp $(ROBOTSTXT) "$(LOCAL_HTDOCS)/htdocs/robots.txt" 
+
+
+
 # target: ssl-cert-create    - One way to create the certificates.
 .PHONY: ssl-cert-create
 ssl-cert-create:
@@ -145,6 +168,13 @@ ssl-cert-renew:
 	sudo service apache2 start
 
 
+# target: etc-hosts - Create a entry in the /etc/hosts for local access.
+.PHONY: etc-hosts
+etc-hosts:
+	$(ECHO) "127.0.0.1 $(WWW_LOCAL)" | sudo bash -c 'cat >> /etc/hosts'
+	@tail -1 /etc/hosts
+
+
 
 # target: virtual-host       - Create entries for the virtual host http.
 .PHONY: virtual-host
@@ -156,9 +186,7 @@ ServerAdmin $(SERVER_ADMIN)
 <VirtualHost *:80>
 	ServerName $${site}
 	ServerAlias local.$${site}
-	ServerAlias do1.$${site}
 	ServerAlias do2.$${site}
-	ServerAlias bth1.$${site}
 	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
 
 	<Directory />
@@ -167,26 +195,7 @@ ServerAdmin $(SERVER_ADMIN)
 		Require all granted
 		Order allow,deny
 		Allow from all
-
-		Options +ExecCGI
-		AddHandler cgi-script .cgi
 	</Directory>
-
-	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
-		ExpiresActive On
-		ExpiresDefault "access plus 1 week"
-	</FilesMatch>
-
-	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
-		ExpiresActive On
-		ExpiresDefault "access plus 1 week"
-	</FilesMatch>
-
-	Include $(HTDOCS_BASE)/$${site}/config/apache-redirects
-	Include $(HTDOCS_BASE)/$${site}/config/apache-rewrites 
-
-	#LogLevel alert rewrite:trace6
-	# tail -f error.log | fgrep '[rewrite:'
 
 	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
 	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined
@@ -211,7 +220,7 @@ virtual-host:
 	$(ECHO) "$$VIRTUAL_HOST_80" | sudo bash -c 'cat > /etc/apache2/sites-available/$(WWW_SITE).conf'
 	$(ECHO) "$$VIRTUAL_HOST_80_WWW" | sudo bash -c 'cat > /etc/apache2/sites-available/www.$(WWW_SITE).conf'
 	sudo a2ensite $(WWW_SITE) www.$(WWW_SITE)
-	sudo a2enmod rewrite expires cgi
+	sudo a2enmod rewrite 
 	sudo apachectl configtest
 	sudo service apache2 reload
 
@@ -224,9 +233,7 @@ ServerAdmin $(SERVER_ADMIN)
 
 <VirtualHost *:80>
 	ServerName $${site}
-	ServerAlias do1.$${site}
 	ServerAlias do2.$${site}
-	ServerAlias bth1.$${site}
 	Redirect "/" "https://$${site}/"
 </VirtualHost>
 
@@ -237,7 +244,6 @@ ServerAdmin $(SERVER_ADMIN)
 	SSLCertificateChainFile $(SSL_PEM_BASE)/chain.pem
 
 	ServerName $${site}
-	ServerAlias do1.$${site}
 	ServerAlias do2.$${site}
 	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
 
@@ -247,21 +253,7 @@ ServerAdmin $(SERVER_ADMIN)
 		Require all granted
 		Order allow,deny
 		Allow from all
-
-		Options +ExecCGI
-		AddHandler cgi-script .cgi
 	</Directory>
-
-	<FilesMatch "\.(jpe?g|png|gif|js|css|svg|ttf|otf|eot|woff|woff2|ico)$">
-		ExpiresActive On
-		ExpiresDefault "access plus 1 week"
-	</FilesMatch>
-
-	Include $(HTDOCS_BASE)/$${site}/config/apache-redirects
-	Include $(HTDOCS_BASE)/$${site}/config/apache-rewrites 
-
-	#LogLevel alert rewrite:trace6
-	# tail -f error.log | fgrep '[rewrite:'
 
 	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
 	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined

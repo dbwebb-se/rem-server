@@ -49,22 +49,33 @@ $app->router->get("api/init", function () use ($app) {
 
 
 /**
+ * Destroy the session.
+ */
+$app->router->get("api/destroy", function () use ($app) {
+    $app->session->destroy();
+    $app->response->sendJson(["message" => "The session was destroyed."]);
+    exit;
+});
+
+
+
+/**
  * Get a subset of a particular dataset
  */
 $app->router->get("api/{dataset:alphanum}", function ($dataset) use ($app) {
+    // Get/create the dataset selected
     $data = $app->session->get("api");
-
-    $dataset = array_key_exists($dataset, $data)
+    $set = isset($data[$dataset])
         ? $data[$dataset]
         : [];
 
     $offset = $app->request->getGet("offset", 0);
     $limit = $app->request->getGet("limit", 25);
     $res = [
-        "data" => array_slice($dataset, $offset, $limit),
+        "data" => array_slice($set, $offset, $limit),
         "offset" => $offset,
         "limit" => $limit,
-        "total" => count($dataset)
+        "total" => count($set)
     ];
 
     $app->response->sendJson($res);
@@ -76,15 +87,16 @@ $app->router->get("api/{dataset:alphanum}", function ($dataset) use ($app) {
  * Get one item from a particular dataset
  */
 $app->router->get("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) use ($app) {
+    // Get/create the dataset selected
     $data = $app->session->get("api");
-
-    $dataset = array_key_exists($dataset, $data)
+    $set = isset($data[$dataset])
         ? $data[$dataset]
         : [];
+    $id = (int) $id;
 
     // Find by id
     $found = null;
-    foreach ($dataset as $item) {
+    foreach ($set as $item) {
         if ($item["id"] === $id) {
             $found = $item;
             break;
