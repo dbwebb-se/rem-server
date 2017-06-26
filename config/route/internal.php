@@ -9,5 +9,6 @@ $app->router->addInternal("404", function () use ($app) {
     // Render a standard page using layout
     $app->renderPage([
         "title" => "404",
+        "message" => "404",
     ], 404);
 });

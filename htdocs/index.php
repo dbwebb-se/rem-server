@@ -19,7 +19,6 @@ $app->response   = new \Anax\Response\Response();
 $app->url        = new \Anax\Url\Url();
 $app->router     = new \Anax\Route\RouterInjectable();
 $app->view       = new \Anax\View\ViewContainer();
-$app->db         = new \Anax\Database\DatabaseConfigure();
 $app->textfilter = new \Anax\TextFilter\TextFilter();
 $app->session    = new \Anax\Session\SessionConfigurable();
 
@@ -42,10 +41,6 @@ $app->url->setScriptName($app->request->getScriptName());
 // Update url configuration with values from config file.
 $app->url->configure("url.php");
 $app->url->setDefaultsFromConfiguration();
-
-// Get database config.
-$app->db->configure("database.php");
-$app->db->setDefaultsFromConfiguration();
 
 // Get session config.
 $app->session->configure("session.php");

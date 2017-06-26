@@ -21,7 +21,8 @@ This is how you set up a local environment for a apache virtual host on your own
 
 ```bash
 $ make etc-hosts
-$ sudo make virtual-hosts
+$ make virtual-hosts
+$ make local-publish
 ```
 
 

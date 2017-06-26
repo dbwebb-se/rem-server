@@ -1,11 +1,11 @@
-REM - a REST Mockup API
+REM Server - a REST Mockup API
 ===========================================
 
 This is a mockup server for development of applications working with a REST API. The server responds to any API endpoint, stores data and changes to the data in the user session.
 
 The server has a default dataset for the endpoint `api/users`.
 
-You can add your own datasets and work with them on `api/[datasets]`.
+You can add your own datasets and work with them through `api/[datasets]`.
 
 
 
@@ -49,7 +49,7 @@ Results.
         ...
     ],
     "offset": 0,
-    "limit": 10,
+    "limit": 25,
     "total": 12
 }
 ```
@@ -165,3 +165,10 @@ Other REM servers {#other}
 There are more servers doing the same thing.
 
 * [REM REST API](http://rem-rest-api.herokuapp.com/)
+
+
+
+Source {#source}
+-------------------------------------------
+
+The source is on GitHub in [dbwebb-se/rem-server](https://github.com/dbwebb-se/rem-server).

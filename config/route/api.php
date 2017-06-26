@@ -79,6 +79,7 @@ $app->router->get("api/{dataset:alphanum}", function ($dataset) use ($app) {
     ];
 
     $app->response->sendJson($res);
+    exit;
 });
 
 
@@ -109,6 +110,7 @@ $app->router->get("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) 
     }
 
     $app->response->sendJson($found);
+    exit;
 });
 
 
@@ -142,6 +144,7 @@ $app->router->post("api/{dataset:alphanum}", function ($dataset) use ($app) {
     $app->session->set("api", $data);
 
     $app->response->sendJson($entry);
+    exit;
 });
 
 
@@ -181,6 +184,7 @@ $app->router->put("api/{dataset:alphanum}/{id:digit}", function ($dataset, $id) 
     $app->session->set("api", $data);
 
     $app->response->sendJson($entry);
+    exit;
 });
 
 
@@ -210,4 +214,15 @@ $app->router->delete("api/{dataset:alphanum}/{id:digit}", function ($dataset, $i
     $app->session->set("api", $data);
 
     $app->response->sendJson(null);
+    exit;
+});
+
+
+
+/**
+ * Start/create a session and store some default data in it.
+ */
+$app->router->add("api/**", function () use ($app) {
+    $app->response->sendJson(["message" => "404. The api/ does not support that."], 404);
+    exit;
 });

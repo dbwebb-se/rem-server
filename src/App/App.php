@@ -20,6 +20,8 @@ class App
      */
     public function renderPage($data, $status = 200)
     {
+        $data["stylesheets"] = ["css/style.css"];
+
         // Add layout, render it, add to response and send.
         $this->view->add("default1/layout", $data, "layout");
         $body = $this->view->renderBuffered("layout");
