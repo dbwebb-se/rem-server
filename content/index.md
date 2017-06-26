@@ -24,6 +24,8 @@ API {#api}
 
 ###Get the dataset {#all}
 
+Get the full dataset, or a part of it.
+
 ```text
 GET /api/[dataset]
 GET /api/users
