@@ -26,7 +26,7 @@ Point a web browser to the htdocs directory.
 Setup Apache Virtual Host
 --------------------------------------------
 
-This is how you set up a local environment for a apache virtual host on your own machine.
+This is how you set up a local environment with an apache virtual host on your own machine.
 
 ```bash
 $ make etc-hosts
