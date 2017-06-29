@@ -21,12 +21,17 @@ $app->router     = new \Anax\Route\RouterInjectable();
 $app->view       = new \Anax\View\ViewContainer();
 $app->textfilter = new \Anax\TextFilter\TextFilter();
 $app->session    = new \Anax\Session\SessionConfigurable();
+$app->rem        = new \Mos\RemServer\RemServer();
+$app->remController = new \Mos\RemServer\RemServerController();
 
 // Init the object of the request class.
 $app->request->init();
 
 // Inject $app into the view container for use in view files.
 $app->view->setApp($app);
+
+// Inject $app into the router.
+$app->router->setApp($app);
 
 // Update view configuration with values from config file.
 $app->view->configure("view.php");
@@ -44,6 +49,13 @@ $app->url->setDefaultsFromConfiguration();
 
 // Get session config.
 $app->session->configure("session.php");
+
+// Init REM Server
+$app->rem->configure("remserver.php");
+$app->rem->inject(["session" => $app->session]);
+
+// Init controller for the REM Server
+$app->remController->setApp($app);
 
 // Load the routes
 require ANAX_INSTALL_PATH . "/config/route.php";
