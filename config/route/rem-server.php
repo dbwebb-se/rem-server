@@ -14,7 +14,7 @@ function initSessionWithDataset($app)
     $files = ["users"];
     $dataset = [];
     foreach ($files as $file) {
-        $content = file_get_contents(ANAX_INSTALL_PATH . "/config/api/$file.json");
+        $content = file_get_contents(ANAX_INSTALL_PATH . "/config/rem-server/$file.json");
         $dataset[$file] = json_decode($content, true);
     }
 
