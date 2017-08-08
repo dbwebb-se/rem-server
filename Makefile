@@ -2,6 +2,11 @@
 #
 #
 
+# ------------------------------------------------------------------------
+#
+# Generel stuff
+#
+
 # Detect OS
 OS = $(shell uname -s)
 
@@ -30,26 +35,24 @@ HELPTEXT = $(ECHO) "$(ACTION)--->" `egrep "^\# target: $(1) " $(THIS_MAKEFILE) |
 
 
 
-# --------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 #
-# Local
+# Specifics
 #
-WWW_SITE	:= rem.dbwebb.se
-WWW_LOCAL	:= local.$(WWW_SITE)
-SERVER_ADMIN := mos@$(WWW_SITE)
-BASE_URL    = https://$(WWW_SITE)/
 
-GIT_BASE 	= git/$(WWW_SITE)
-HTDOCS_BASE = $(HOME)/htdocs
-LOCAL_HTDOCS = $(HTDOCS_BASE)/$(WWW_SITE)
-ROBOTSTXT	 := robots.txt
-
-# Certificates for https
-SSL_APACHE_CONF = /etc/letsencrypt/options-ssl-apache.conf
-SSL_PEM_BASE 	= /etc/letsencrypt/live/$(WWW_SITE)
-
-# Publish
-EXCLUDE_ON_PUBLISH = --exclude old --exclude backup --exclude .git --exclude .solution --exclude .solutions --exclude error.log --exclude cache --exclude access.log --delete
+# Add local bin path for test tools
+#PATH := "./.bin:./vendor/bin:./node_modules/.bin:$(PATH)"
+#SHELL := env PATH=$(PATH) $(SHELL)
+BIN     := .bin
+PHPUNIT := $(BIN)/phpunit
+PHPLOC 	:= $(BIN)/phploc
+PHPCS   := $(BIN)/phpcs
+PHPCBF  := $(BIN)/phpcbf
+PHPMD   := $(BIN)/phpmd
+PHPDOC  := $(BIN)/phpdoc
+BEHAT   := $(BIN)/behat
+SHELLCHECK := $(BIN)/shellcheck
+BATS := $(BIN)/bats
 
 
 
@@ -68,34 +71,46 @@ help:
 .PHONY:  prepare
 prepare:
 	@$(call HELPTEXT,$@)
+	[ -d .bin ] || mkdir .bin
+	[ -d build ] || mkdir build
+	rm -rf build/*
 
 
 
 # target: clean              - Removes generated files and directories.
-.PHONY: clean
+.PHONY:  clean
 clean:
 	@$(call HELPTEXT,$@)
+	rm -rf build
+
+
+
+# target: clean-cache        - Clean the cache.
+.PHONY:  clean-cache
+clean-cache:
+	@$(call HELPTEXT,$@)
+	rm -rf cache/*/*
 
 
 
 # target: clean-all          - Removes generated files and directories.
 .PHONY:  clean-all
-clean-all: clean
+clean-all:
 	@$(call HELPTEXT,$@)
-	rm -rf vendor
+	rm -rf .bin build vendor
 
 
 
 # target: check              - Check version of installed tools.
 .PHONY:  check
-check:
+check: check-tools-bash check-tools-php
 	@$(call HELPTEXT,$@)
 
 
 
 # target: test               - Run all tests.
 .PHONY:  test
-test:
+test: bats phpunit phpcs phpmd phploc behat # shellcheck
 	@$(call HELPTEXT,$@)
 	composer validate
 
@@ -110,16 +125,15 @@ doc: phpdoc
 
 # target: build              - Do all build
 .PHONY:  build
-build: test doc #less-compile less-minify js-minify
+build: test doc #theme less-compile less-minify js-minify
 	@$(call HELPTEXT,$@)
 
 
 
-# target: install            - Install essentials.
+# target: install            - Install all tools
 .PHONY:  install
-install:
+install: prepare install-tools-bash install-tools-php
 	@$(call HELPTEXT,$@)
-	composer install
 
 
 
@@ -127,7 +141,7 @@ install:
 .PHONY:  update
 update:
 	@$(call HELPTEXT,$@)
-	git pull
+	[ ! -d .git ] || git pull
 	composer update
 
 
@@ -139,150 +153,194 @@ tag-prepare:
 
 
 
-# target: local-publish      - Publish website to local host.
-.PHONY: local-publish
-local-publish:
+# ------------------------------------------------------------------------
+#
+# PHP
+#
+
+# target: install-tools-php  - Install PHP development tools.
+.PHONY: install-tools-php
+install-tools-php:
 	@$(call HELPTEXT,$@)
-	rsync -av $(EXCLUDE_ON_PUBLISH) config content htdocs vendor src $(LOCAL_HTDOCS)
+	curl -Lso $(PHPDOC) https://www.phpdoc.org/phpDocumentor.phar && chmod 755 $(PHPDOC)
 
-	@# Enable robots if available
-	[ ! -f $(ROBOTSTXT) ] || cp $(ROBOTSTXT) "$(LOCAL_HTDOCS)/htdocs/robots.txt" 
+	curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
 
+	curl -Lso $(PHPCBF) https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar && chmod 755 $(PHPCBF)
 
+	curl -Lso $(PHPMD) http://static.phpmd.org/php/latest/phpmd.phar && chmod 755 $(PHPMD)
 
-# target: ssl-cert-create    - One way to create the certificates.
-.PHONY: ssl-cert-create
-ssl-cert-create:
-	sudo certbot certonly --standalone -d $(WWW_SITE) -d www.$(WWW_SITE)
+	curl -Lso $(PHPUNIT) https://phar.phpunit.de/phpunit-5.7.9.phar && chmod 755 $(PHPUNIT)
 
+	curl -Lso $(PHPLOC) https://phar.phpunit.de/phploc.phar && chmod 755 $(PHPLOC)
 
+	curl -Lso $(BEHAT) https://github.com/Behat/Behat/releases/download/v3.3.0/behat.phar && chmod 755 $(BEHAT)
 
-# target: ssl-cert-update    - Update certificates with new expiray date.
-.PHONY: ssl-cert-renew
-ssl-cert-renew:
-	sudo service apache2 stop
-	sudo certbot renew
-	sudo service apache2 start
-
-
-# target: etc-hosts          - Create a entry in the /etc/hosts for local access.
-.PHONY: etc-hosts
-etc-hosts:
-	$(ECHO) "127.0.0.1 $(WWW_LOCAL)" | sudo bash -c 'cat >> /etc/hosts'
-	@tail -1 /etc/hosts
+	composer install
 
 
 
-# target: virtual-host       - Create entries for the virtual host http.
-.PHONY: virtual-host
 
-define VIRTUAL_HOST_80
-Define site $(WWW_SITE)
-ServerAdmin $(SERVER_ADMIN)
-
-<VirtualHost *:80>
-	ServerName $${site}
-	ServerAlias local.$${site}
-	ServerAlias do2.$${site}
-	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
-
-	<Directory />
-		Options Indexes FollowSymLinks
-		AllowOverride All
-		Require all granted
-		Order allow,deny
-		Allow from all
-	</Directory>
-
-	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
-	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined
-</VirtualHost>
-endef
-export VIRTUAL_HOST_80
-
-define VIRTUAL_HOST_80_WWW
-Define site $(WWW_SITE)
-ServerAdmin $(SERVER_ADMIN)
-
-<VirtualHost *:80>
-	ServerName www.$${site}
-	Redirect "/" "http://$${site}/"
-</VirtualHost>
-endef
-export VIRTUAL_HOST_80_WWW
-
-virtual-host:
+# target: check-tools-php    - Check versions of PHP tools.
+.PHONY: check-tools-php
+check-tools-php:
 	@$(call HELPTEXT,$@)
-	install -d $(LOCAL_HTDOCS)/htdocs
-	$(ECHO) "$$VIRTUAL_HOST_80" | sudo bash -c 'cat > /etc/apache2/sites-available/$(WWW_SITE).conf'
-	$(ECHO) "$$VIRTUAL_HOST_80_WWW" | sudo bash -c 'cat > /etc/apache2/sites-available/www.$(WWW_SITE).conf'
-	sudo a2ensite $(WWW_SITE) www.$(WWW_SITE)
-	sudo a2enmod rewrite 
-	sudo apachectl configtest
-	sudo service apache2 reload
+	which $(PHPUNIT) && $(PHPUNIT) --version
+	which $(PHPLOC) && $(PHPLOC) --version
+	which $(PHPCS) && $(PHPCS) --version && echo
+	which $(PHPMD) && $(PHPMD) --version && echo
+	which $(PHPCBF) && $(PHPCBF) --version && echo
+	which $(PHPDOC) && $(PHPDOC) --version && echo
+	which $(BEHAT) && $(BEHAT) --version && echo
 
-# target: virtual-host-https - Create entries for the virtual host https.
-.PHONY: virtual-host-https
 
-define VIRTUAL_HOST_443
-Define site $(WWW_SITE)
-ServerAdmin $(SERVER_ADMIN)
 
-<VirtualHost *:80>
-	ServerName $${site}
-	ServerAlias do2.$${site}
-	Redirect "/" "https://$${site}/"
-</VirtualHost>
-
-<VirtualHost *:443>
-	Include $(SSL_APACHE_CONF)
-	SSLCertificateFile 		$(SSL_PEM_BASE)/cert.pem
-	SSLCertificateKeyFile 	$(SSL_PEM_BASE)/privkey.pem
-	SSLCertificateChainFile $(SSL_PEM_BASE)/chain.pem
-
-	ServerName $${site}
-	ServerAlias do2.$${site}
-	DocumentRoot $(HTDOCS_BASE)/$${site}/htdocs
-
-	<Directory />
-		Options Indexes FollowSymLinks
-		AllowOverride All
-		Require all granted
-		Order allow,deny
-		Allow from all
-	</Directory>
-
-	ErrorLog  $(HTDOCS_BASE)/$${site}/error.log
-	CustomLog $(HTDOCS_BASE)/$${site}/access.log combined
-</VirtualHost>
-endef
-export VIRTUAL_HOST_443
-
-define VIRTUAL_HOST_443_WWW
-Define site $(WWW_SITE)
-ServerAdmin $(SERVER_ADMIN)
-
-<VirtualHost *:80>
-	ServerName www.$${site}
-	Redirect "/" "https://www.$${site}/"
-</VirtualHost>
-
-<VirtualHost *:443>
-	Include $(SSL_APACHE_CONF)
-	SSLCertificateFile 		$(SSL_PEM_BASE)/cert.pem
-	SSLCertificateKeyFile 	$(SSL_PEM_BASE)/privkey.pem
-	SSLCertificateChainFile $(SSL_PEM_BASE)/chain.pem
-
-	ServerName www.$${site}
-	Redirect "/" "https://$${site}/"
-</VirtualHost>
-endef
-export VIRTUAL_HOST_443_WWW
-
-virtual-host-https:
+# target: phpunit            - Run unit tests for PHP.
+.PHONY: phpunit
+phpunit: prepare
 	@$(call HELPTEXT,$@)
-	$(ECHO) "$$VIRTUAL_HOST_443" | sudo bash -c 'cat > /etc/apache2/sites-available/$(WWW_SITE).conf'
-	$(ECHO) "$$VIRTUAL_HOST_443_WWW" | sudo bash -c 'cat > /etc/apache2/sites-available/www.$(WWW_SITE).conf'
-	sudo a2enmod ssl
-	sudo apachectl configtest
-	sudo service apache2 reload
+	[ ! -f .phpunit.xml ] || $(PHPUNIT) --configuration .phpunit.xml
+
+
+
+# target: phpcs              - Codestyle for PHP.
+.PHONY: phpcs
+phpcs: prepare
+	@$(call HELPTEXT,$@)
+	[ ! -f .phpcs.xml ] || $(PHPCS) --standard=.phpcs.xml | tee build/phpcs
+
+
+
+# target: phpcbf             - Fix codestyle for PHP.
+.PHONY: phpcbf
+phpcbf:
+	@$(call HELPTEXT,$@)
+	[ ! -f .phpcs.xml ] || $(PHPCBF) --standard=.phpcs.xml
+
+
+
+# target: phpmd              - Mess detector for PHP.
+.PHONY: phpmd
+phpmd: prepare
+	@$(call HELPTEXT,$@)
+	- [ ! -f .phpmd.xml ] || $(PHPMD) . text .phpmd.xml | tee build/phpmd
+
+
+
+# target: phploc             - Code statistics for PHP.
+.PHONY: phploc
+phploc: prepare
+	@$(call HELPTEXT,$@)
+	$(PHPLOC) src > build/phploc
+
+
+
+# target: phpdoc             - Create documentation for PHP.
+.PHONY: phpdoc
+phpdoc:
+	@$(call HELPTEXT,$@)
+	[ ! -f .phpdoc.xml ] || $(PHPDOC) --config=.phpdoc.xml
+
+
+
+# target: behat              - Run behat for feature tests.
+.PHONY: behat
+behat:
+	@$(call HELPTEXT,$@)
+	[ ! -d features ] || $(BEHAT)
+
+
+
+# ------------------------------------------------------------------------
+#
+# Bash
+#
+
+# target: install-tools-bash - Install Bash development tools.
+.PHONY: install-tools-bash
+install-tools-bash:
+	@$(call HELPTEXT,$@)
+	# Shellcheck
+	curl -s https://storage.googleapis.com/shellcheck/shellcheck-latest.linux.x86_64.tar.xz | tar -xJ -C build/ && rm -f .bin/shellcheck && ln build/shellcheck-latest/shellcheck .bin/
+
+	# Bats
+	curl -Lso $(BIN)/bats-exec-suite https://raw.githubusercontent.com/sstephenson/bats/master/libexec/bats-exec-suite
+	curl -Lso $(BIN)/bats-exec-test https://raw.githubusercontent.com/sstephenson/bats/master/libexec/bats-exec-test
+	curl -Lso $(BIN)/bats-format-tap-stream https://raw.githubusercontent.com/sstephenson/bats/master/libexec/bats-format-tap-stream
+	curl -Lso $(BIN)/bats-preprocess https://raw.githubusercontent.com/sstephenson/bats/master/libexec/bats-preprocess
+	curl -Lso $(BATS) https://raw.githubusercontent.com/sstephenson/bats/master/libexec/bats
+	chmod 755 $(BIN)/bats*
+
+
+
+
+# target: check-tools-bash   - Check versions of Bash tools.
+.PHONY: check-tools-bash
+check-tools-bash:
+	@$(call HELPTEXT,$@)
+	which $(SHELLCHECK) && $(SHELLCHECK) --version
+	which $(BATS) && $(BATS) --version
+
+
+
+# target: shellcheck         - Run shellcheck for bash files.
+.PHONY: shellcheck
+shellcheck:
+	@$(call HELPTEXT,$@)
+	[ ! -d src ] || $(SHELLCHECK) --shell=bash src/*.bash
+
+
+
+# target: bats               - Run bats for unit testing bash files.
+.PHONY: bats
+bats:
+	@$(call HELPTEXT,$@)
+	[ ! -d test ] || $(BATS) test/
+
+
+
+# ------------------------------------------------------------------------
+#
+# Theme
+#
+# target: theme              - Do make build install in theme/ if available.
+.PHONY: theme
+theme:
+	@$(call HELPTEXT,$@)
+	[ ! -d theme ] || ( cd theme && make build install )
+
+
+
+# ------------------------------------------------------------------------
+#
+# Cimage
+#
+
+define CIMAGE_CONFIG
+<?php
+return [
+    "mode"         => "development",
+    "image_path"   =>  __DIR__ . "/../img/",
+    "cache_path"   =>  __DIR__ . "/../../cache/cimage/",
+    "autoloader"   =>  __DIR__ . "/../../vendor/autoload.php",
+];
+endef
+export CIMAGE_CONFIG
+
+# target: cimage-update           - Install/update Cimage to latest version.
+.PHONY: cimage-update
+cimage-update:
+	@$(call HELPTEXT,$@)
+	composer require mos/cimage
+	install -d htdocs/cimage cache/cimage
+	chmod 777 cache/cimage
+	cp vendor/mos/cimage/webroot/img.php htdocs/cimage
+	cp vendor/mos/cimage/webroot/img/car.png htdocs/img/
+	touch htdocs/cimage/img_config.php
+
+# target: cimage-config-create    - Create configfile for Cimage.
+.PHONY: cimage-config-create
+cimage-config-create:
+	@$(call HELPTEXT,$@)
+	$(ECHO) "$$CIMAGE_CONFIG" | bash -c 'cat > htdocs/cimage/img_config.php'
+	cat htdocs/cimage/img_config.php
