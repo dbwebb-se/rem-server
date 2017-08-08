@@ -4,6 +4,8 @@ namespace Anax\App;
 
 /**
  * An App class to wrap the resources of the framework.
+ *
+ * @SuppressWarnings(PHPMD.ExitExpression)
  */
 class App
 {

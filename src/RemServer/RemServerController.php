@@ -7,6 +7,8 @@ use \Anax\Common\AppInjectableTrait;
 
 /**
  * A controller for the REM Server.
+ *
+ * @SuppressWarnings(PHPMD.ExitExpression)
  */
 class RemServerController implements AppInjectableInterface
 {
