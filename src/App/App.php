@@ -4,10 +4,12 @@ namespace Mos\App;
 
 /**
  * An App class to wrap the resources of the framework.
+ *
+ * @SuppressWarnings(PHPMD.ExitExpression)
  */
 class App
 {
-    public function redirect ($url)
+    public function redirect($url)
     {
         $this->response->redirect($this->url->create($url));
         exit;
@@ -25,7 +27,8 @@ class App
         // Add layout, render it, add to response and send.
         $this->view->add("default1/layout", $data, "layout");
         $body = $this->view->renderBuffered("layout");
-        $this->response->setBody($body)->send($status);
+        $this->response->setBody($body)
+                       ->send($status);
         exit;
     }
 }
