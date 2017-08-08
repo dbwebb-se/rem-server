@@ -50,7 +50,7 @@ class RemServer implements ConfigureInterface
      */
     public function init()
     {
-        $files = $this->config["datasets"];
+        $files = $this->config["dataset"];
         $dataset = [];
         foreach ($files as $file) {
             $content = file_get_contents($file);
