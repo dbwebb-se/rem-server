@@ -1,6 +1,6 @@
 <?php
 
-namespace Mos\RemServer;
+namespace Anax\RemServer;
 
 use \Anax\Common\AppInjectableInterface;
 use \Anax\Common\AppInjectableTrait;

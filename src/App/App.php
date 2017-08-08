@@ -1,6 +1,6 @@
 <?php
 
-namespace Mos\App;
+namespace Anax\App;
 
 /**
  * An App class to wrap the resources of the framework.

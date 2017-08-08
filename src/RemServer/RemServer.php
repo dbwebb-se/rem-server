@@ -1,6 +1,6 @@
 <?php
 
-namespace Mos\RemServer;
+namespace Anax\RemServer;
 
 use \Anax\Configure\ConfigureInterface;
 use \Anax\Configure\ConfigureTrait;

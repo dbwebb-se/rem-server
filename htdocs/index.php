@@ -21,8 +21,8 @@ $app->router     = new \Anax\Route\RouterInjectable();
 $app->view       = new \Anax\View\ViewContainer();
 $app->textfilter = new \Anax\TextFilter\TextFilter();
 $app->session    = new \Anax\Session\SessionConfigurable();
-$app->rem        = new \Mos\RemServer\RemServer();
-$app->remController = new \Mos\RemServer\RemServerController();
+$app->rem        = new \Anax\RemServer\RemServer();
+$app->remController = new \Anax\RemServer\RemServerController();
 
 // Init the object of the request class.
 $app->request->init();

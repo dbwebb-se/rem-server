@@ -1,5 +1,5 @@
 {
-    "name": "dbwebb-se/rem-server",
+    "name": "dbwebb-se/remserver",
     "description": "A REST Mockup API for rapid prototyping.",
     "license": "MIT",
     "authors": [
@@ -19,6 +19,6 @@
         "anax/textfilter": "^1.0"
     },
     "autoload": {
-        "psr-4": {"Mos\\": "src/"}
+        "psr-4": {"Anax\\": "src/"}
     }
 }
