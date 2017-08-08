@@ -13,7 +13,7 @@ require ANAX_INSTALL_PATH . "/config/error_reporting.php";
 require ANAX_INSTALL_PATH . "/vendor/autoload.php";
 
 // Add all resources to $app
-$app = new \Mos\App\App();
+$app = new \Anax\App\App();
 $app->request    = new \Anax\Request\Request();
 $app->response   = new \Anax\Response\Response();
 $app->url        = new \Anax\Url\Url();
