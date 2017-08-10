@@ -29,15 +29,15 @@ class RemServer implements ConfigureInterface
 
 
     /**
-     * Inject dependencies.
+     * Inject dependency to $session..
      *
-     * @param array $dependency key/value array with dependencies.
+     * @param array $session object representing session.
      *
      * @return self
      */
-    public function inject($dependency)
+    public function injectSession($session)
     {
-        $this->session = $dependency["session"];
+        $this->session = $session;
         return $this;
     }
 

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c80fac9dfb543aa9e681377b0dc500e6",
+    "content-hash": "8436ba4e1718c8f6d79feb6dc2e7e279",
     "packages": [
         {
             "name": "anax/common",
-            "version": "v1.0.11",
+            "version": "v1.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canax/common.git",
-                "reference": "064d8384d229e8153f8433bb185f02cd2b8b8f86"
+                "reference": "a471f66925c1ee1c73c18e30cf630809485571df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canax/common/zipball/064d8384d229e8153f8433bb185f02cd2b8b8f86",
-                "reference": "064d8384d229e8153f8433bb185f02cd2b8b8f86",
+                "url": "https://api.github.com/repos/canax/common/zipball/a471f66925c1ee1c73c18e30cf630809485571df",
+                "reference": "a471f66925c1ee1c73c18e30cf630809485571df",
                 "shasum": ""
             },
             "require": {
@@ -56,7 +56,7 @@
                 "micro",
                 "mvc"
             ],
-            "time": "2017-08-04T14:19:51+00:00"
+            "time": "2017-08-10T07:27:39+00:00"
         },
         {
             "name": "anax/configure",
@@ -103,6 +103,52 @@
                 "mvc"
             ],
             "time": "2017-05-04T08:43:29+00:00"
+        },
+        {
+            "name": "anax/di",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/canax/di.git",
+                "reference": "39dd550a5801c2416e2eb1945a51387bb9fa0237"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/canax/di/zipball/39dd550a5801c2416e2eb1945a51387bb9fa0237",
+                "reference": "39dd550a5801c2416e2eb1945a51387bb9fa0237",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Anax\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mikael Roos",
+                    "email": "mos@dbwebb.se",
+                    "homepage": "https://dbwebb.se",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Anax dependency injection module.",
+            "homepage": "https://dbwebb.se/anax",
+            "keywords": [
+                "boilerplate",
+                "education",
+                "framework",
+                "micro",
+                "mvc"
+            ],
+            "time": "2017-06-29T18:46:46+00:00"
         },
         {
             "name": "anax/request",
@@ -201,16 +247,16 @@
         },
         {
             "name": "anax/router",
-            "version": "v1.0.9",
+            "version": "v1.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canax/router.git",
-                "reference": "4207c0226226c0d60e8660cef6b1c32a21bcc77f"
+                "reference": "29bae6f9a072d17bce986d4b566a7e5ee3beabce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canax/router/zipball/4207c0226226c0d60e8660cef6b1c32a21bcc77f",
-                "reference": "4207c0226226c0d60e8660cef6b1c32a21bcc77f",
+                "url": "https://api.github.com/repos/canax/router/zipball/29bae6f9a072d17bce986d4b566a7e5ee3beabce",
+                "reference": "29bae6f9a072d17bce986d4b566a7e5ee3beabce",
                 "shasum": ""
             },
             "require": {
@@ -244,7 +290,7 @@
                 "micro",
                 "mvc"
             ],
-            "time": "2017-08-03T15:37:22+00:00"
+            "time": "2017-08-10T06:01:25+00:00"
         },
         {
             "name": "anax/session",
