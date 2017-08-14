@@ -38,6 +38,7 @@ return [
             "callback" => function () {
                 $router = new \Anax\Route\Router();
                 $router->setDI($this);
+                $router->configure("route2.php");
                 return $router;
             }
         ],
@@ -69,6 +70,38 @@ return [
         "textfilter" => [
             "shared" => true,
             "callback" => "\Anax\TextFilter\TextFilter",
+        ],
+        "pageRender" => [
+            "shared" => true,
+            "callback" => function () {
+                $obj = new \Anax\Page\PageRender();
+                $obj->setDI($this);
+                return $obj;
+            }
+        ],
+        "errorController" => [
+            "shared" => true,
+            "callback" => function () {
+                $obj = new \Anax\Page\ErrorController();
+                $obj->setDI($this);
+                return $obj;
+            }
+        ],
+        "debugController" => [
+            "shared" => true,
+            "callback" => function () {
+                $obj = new \Anax\Page\DebugController();
+                $obj->setDI($this);
+                return $obj;
+            }
+        ],
+        "flatFileContentController" => [
+            "shared" => true,
+            "callback" => function () {
+                $obj = new \Anax\Page\FlatFileContentController();
+                $obj->setDI($this);
+                return $obj;
+            }
         ],
         "rem" => [
             "shared" => true,
