@@ -17,7 +17,7 @@ return [
             "file" => __DIR__ . "/route2/debug.php",
         ],
         [
-            // To read flat file content in Markdown from content/
+            // Routers for the REM server mounts on api/
             "mount" => "api",
             "file" => __DIR__ . "/route/remserver.php",
         ],
